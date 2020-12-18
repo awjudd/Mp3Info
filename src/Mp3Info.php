@@ -278,9 +278,11 @@ class Mp3Info {
              */
             $framesCount = $this->readMpegFrame($fp);
 
+            $frameSize = intval($this->_cbrFrameSize) === 0 ? 1 : $this->_cbrFrameSize;
+
             $this->_framesCount = $framesCount !== null
                 ? $framesCount
-                : ceil($audioSize / $this->_cbrFrameSize);
+                : ceil($audioSize / $frameSize);
 
             // recalculate average bit rate in vbr case
             if ($this->isVbr && $framesCount !== null) {
@@ -507,12 +509,12 @@ class Mp3Info {
 
         if ($this->id3v2MajorVersion == 2)  // parse id3v2.2.0 body
             /*throw new \Exception('NEED TO PARSE id3v2.2.0 flags!');*/
-            {}
+        {}
         else if ($this->id3v2MajorVersion == 3) // parse id3v2.3.0 body
             $this->parseId3v23Body($fp, 10 + $size);
         else if ($this->id3v2MajorVersion == 4)  // parse id3v2.4.0 body
             /*throw new \Exception('NEED TO PARSE id3v2.4.0 flags!');*/
-            {}
+        {}
 
         return 10 + $size; // 10 bytes - header, rest - body
     }
@@ -725,8 +727,8 @@ class Mp3Info {
             || (
                 filesize($filename) > 128
                 && file_get_contents($filename, false, null, -128, 3) === self::TAG1_SYNC
-                )  // id3v1 tag
-        ;
+            )  // id3v1 tag
+            ;
     }
 
     /**
@@ -751,14 +753,14 @@ class Mp3Info {
     protected function fillTags()
     {
         foreach ([
-            'song' => 'TIT2',
-            'artist' => 'TPE1',
-            'album' => 'TALB',
-            'year' => 'TYER',
-            'comment' => 'COMM',
-            'track' => 'TRCK',
-            'genre' => 'TCON',
-        ] as $tag => $id3v2_tag) {
+                     'song' => 'TIT2',
+                     'artist' => 'TPE1',
+                     'album' => 'TALB',
+                     'year' => 'TYER',
+                     'comment' => 'COMM',
+                     'track' => 'TRCK',
+                     'genre' => 'TCON',
+                 ] as $tag => $id3v2_tag) {
             if (!isset($this->tags2[$id3v2_tag]) && (!isset($this->tags1[$tag]) || empty($this->tags1[$tag])))
                 continue;
 
